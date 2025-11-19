@@ -5,5 +5,6 @@ const routes = express.Router()
 
 routes.post('/login', login)
 routes.patch("/update/:id",updateprofile)
+// routes.post('/verify-otp', verifyOtp);
 
 export default routes

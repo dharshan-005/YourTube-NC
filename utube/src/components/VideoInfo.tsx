@@ -39,7 +39,7 @@ const VideoInfo = ({ video }: any) => {
     const handleviews = async () => {
       if (user) {
         try {
-          return await axiosInstance.post(`/history/${video._id}`, {
+          return await axiosInstance.post(`/history/${video?._id}`, {
             userId: user?._id,
           });
         } catch (error) {
@@ -112,10 +112,10 @@ const VideoInfo = ({ video }: any) => {
     }
   };
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-black dark:text-white">
       <h1 className="text-xl font-semibold">{video.videotitle}</h1>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <Avatar className="w-10 h-10">
             <AvatarFallback>{video.videochanel[0]}</AvatarFallback>
@@ -126,8 +126,8 @@ const VideoInfo = ({ video }: any) => {
           </div>
           <Button className="ml-4">Subscribe</Button>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-gray-100 rounded-full">
+        <div className="flex items-center text-black gap-2 flex-row">
+          <div className="flex items-center bg-gray-100 text-black rounded-full">
             <Button
               variant="ghost"
               size="sm"
@@ -136,7 +136,7 @@ const VideoInfo = ({ video }: any) => {
             >
               <ThumbsUp
                 className={`w-5 h-5 mr-2 ${
-                  isLiked ? "fill-black text-black" : ""
+                  isLiked ? "fill-black text-black" : "text-black"
                 }`}
               />
               {likes.toLocaleString()}
@@ -150,23 +150,12 @@ const VideoInfo = ({ video }: any) => {
             >
               <ThumbsDown
                 className={`w-5 h-5 mr-2 ${
-                  isDisliked ? "fill-black text-black" : ""
+                  isDisliked ? "fill-black text-black" : "text-black"
                 }`}
               />
               {dislikes.toLocaleString()}
             </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`bg-gray-100 rounded-full ${
-              isWatchLater ? "text-primary" : ""
-            }`}
-            onClick={handleWatchLater}
-          >
-            <Clock className="w-5 h-5 mr-2" />
-            {isWatchLater ? "Saved" : "Watch Later"}
-          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -178,11 +167,22 @@ const VideoInfo = ({ video }: any) => {
           <Button
             variant="ghost"
             size="sm"
-            className="bg-gray-100 rounded-full"
+            className="bg-gray-100 rounded-full "
           >
             <Download className="w-5 h-5 mr-2" />
             Download
           </Button>
+          {/* <Button
+            variant="ghost"
+            size="sm"
+            className={`bg-gray-100 rounded-full ${
+              isWatchLater ? "text-primary" : ""
+            }`}
+            onClick={handleWatchLater}
+          >
+            <Clock className="w-5 h-5 mr-2" />
+            {isWatchLater ? "Saved" : "Watch Later"}
+          </Button> */}
           <Button
             variant="ghost"
             size="icon"
@@ -192,7 +192,7 @@ const VideoInfo = ({ video }: any) => {
           </Button>
         </div>
       </div>
-      <div className="bg-gray-100 rounded-lg p-4">
+      <div className="bg-gray-100 text-black dark:bg-[#303030] dark:text-white rounded-lg p-4">
         <div className="flex gap-4 text-sm font-medium mb-2">
           <span>{video.views.toLocaleString()} views</span>
           <span>{formatDistanceToNow(new Date(video.createdAt))} ago</span>

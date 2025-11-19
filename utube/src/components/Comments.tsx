@@ -1,52 +1,230 @@
-import React, { useState } from "react";
-import { Avatar, AvatarFallback } from "./ui/avatar";
+import React, { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
+import { formatDistanceToNow } from "date-fns";
+import { useUser } from "@/lib/AuthContext";
+import axiosInstance from "@/lib/axiosinstance";
+interface Comment {
+  _id: string;
+  videoid: string;
+  userid: string;
+  commentbody: string;
+  usercommented: string;
+  commentedon: string;
+}
+const Comments = ({ videoId }: any) => {
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+  const { user } = useUser();
+  const [loading, setLoading] = useState(true);
+  const fetchedComments = [
+    {
+      _id: "1",
+      videoid: videoId,
+      userid: "1",
+      commentbody: "Great video! Really enjoyed watching this.",
+      usercommented: "John Doe",
+      commentedon: new Date(Date.now() - 3600000).toISOString(),
+    },
+    {
+      _id: "2",
+      videoid: videoId,
+      userid: "2",
+      commentbody: "Thanks for sharing this amazing content!",
+      usercommented: "Jane Smith",
+      commentedon: new Date(Date.now() - 7200000).toISOString(),
+    },
+  ];
+  useEffect(() => {
+    loadComments();
+  }, [videoId]);
 
-const ChannelHeader = ({ channel, user }: any) => {
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const loadComments = async () => {
+    try {
+      const res = await axiosInstance.get(`/comment/${videoId}`);
+      setComments(res.data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  if (loading) {
+    return <div>Loading history...</div>;
+  }
+  const handleSubmitComment = async () => {
+    if (!user || !newComment.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await axiosInstance.post("/comment/postcomment", {
+        videoid: videoId,
+        userid: user._id,
+        commentbody: newComment,
+        usercommented: user.name,
+      });
+      if (res.data.comment) {
+        const newCommentObj: Comment = {
+          _id: Date.now().toString(),
+          videoid: videoId,
+          userid: user._id,
+          commentbody: newComment,
+          usercommented: user.name || "Anonymous",
+          commentedon: new Date().toISOString(),
+        };
+        setComments([newCommentObj, ...comments]);
+      }
+      setNewComment("");
+    } catch (error) {
+      console.error("Error adding comment:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEdit = (comment: Comment) => {
+    setEditingCommentId(comment._id);
+    setEditText(comment.commentbody);
+  };
+
+  const handleUpdateComment = async () => {
+    if (!editText.trim()) return;
+    try {
+      const res = await axiosInstance.post(
+        `/comment/editcomment/${editingCommentId}`,
+        { commentbody: editText }
+      );
+      if (res.data) {
+        setComments((prev) =>
+          prev.map((c) =>
+            c._id === editingCommentId ? { ...c, commentbody: editText } : c
+          )
+        );
+        setEditingCommentId(null);
+        setEditText("");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await axiosInstance.delete(`/comment/deletecomment/${id}`);
+      if (res.data.comment) {
+        setComments((prev) => prev.filter((c) => c._id !== id));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
-    <div className="w-full">
-      {/* Banner */}
-      <div className="relative h-32 md:h-48 lg:h-64 bg-linear-to-r from-blue-400 to-purple-500 overflow-hidden"></div>
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold">{comments.length} Comments</h2>
 
-      {/* Channel Info */}
-      <div className="px-4 py-6">
-        <div className="flex flex-col md:flex-row gap-6 items-start">
-          <Avatar className="w-20 h-20 md:w-32 md:h-32">
-            <AvatarFallback className="text-2xl">
-              {channel?.channelname[0]}
-            </AvatarFallback>
+      {user && (
+        <div className="flex gap-4">
+          <Avatar className="w-10 h-10">
+            <AvatarImage src={user.image || ""} />
+            <AvatarFallback>{user.name?.[0] || "U"}</AvatarFallback>
           </Avatar>
-
           <div className="flex-1 space-y-2">
-            <h1 className="text-2xl md:text-4xl font-bold">{channel?.channelname}</h1>
-            <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-              <span>@{channel?.channelname.toLowerCase().replace(/\s+/g, "")}</span>
-            </div>
-            {channel?.description && (
-              <p className="text-sm text-gray-700 max-w-2xl">
-                {channel?.description}
-              </p>
-            )}
-          </div>
-
-          {user && user?._id !== channel?._id && (
-            <div className="flex gap-2">
+            <Textarea
+              placeholder="Add a comment..."
+              value={newComment}
+              onChange={(e: any) => setNewComment(e.target.value)}
+              className="min-h-[80px] resize-none border-0 border-b-2 rounded-none focus-visible:ring-0"
+            />
+            <div className="flex gap-2 justify-end">
               <Button
-                onClick={() => setIsSubscribed(!isSubscribed)}
-                variant={isSubscribed ? "outline" : "default"}
-                className={
-                  isSubscribed ? "bg-gray-100" : "bg-red-600 hover:bg-red-700"
-                }
+                variant="ghost"
+                onClick={() => setNewComment("")}
+                disabled={!newComment.trim()}
               >
-                {isSubscribed ? "Subscribed" : "Subscribe"}
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitComment}
+                disabled={!newComment.trim() || isSubmitting}
+              >
+                Comment
               </Button>
             </div>
-          )}
+          </div>
         </div>
+      )}
+      <div className="space-y-4">
+        {comments.length === 0 ? (
+          <p className="text-sm text-gray-500 italic">
+            No comments yet. Be the first to comment!
+          </p>
+        ) : (
+          comments.map((comment) => (
+            <div key={comment._id} className="flex gap-4">
+              <Avatar className="w-10 h-10">
+                <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                <AvatarFallback>{comment.usercommented[0]}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-medium text-sm">
+                    {comment.usercommented}
+                  </span>
+                  <span className="text-xs text-gray-600">
+                    {formatDistanceToNow(new Date(comment.commentedon))} ago
+                  </span>
+                </div>
+
+                {editingCommentId === comment._id ? (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={editText}
+                      onChange={(e) => setEditText(e.target.value)}
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        onClick={handleUpdateComment}
+                        disabled={!editText.trim()}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setEditingCommentId(null);
+                          setEditText("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm">{comment.commentbody}</p>
+                    {comment.userid === user?._id && (
+                      <div className="flex gap-2 mt-2 text-sm text-gray-500">
+                        <button onClick={() => handleEdit(comment)}>
+                          Edit
+                        </button>
+                        <button onClick={() => handleDelete(comment._id)}>
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
 };
 
-export default ChannelHeader;
+export default Comments;

@@ -137,7 +137,7 @@ const Comments = ({ videoId }: any) => {
               placeholder="Add a comment..."
               value={newComment}
               onChange={(e: any) => setNewComment(e.target.value)}
-              className="min-h-[80px] resize-none border-0 border-b-2 rounded-none focus-visible:ring-0"
+              className="min-h-20 resize-none border-0 border-b-2 rounded-none focus-visible:ring-0"
             />
             <div className="flex gap-2 justify-end">
               <Button

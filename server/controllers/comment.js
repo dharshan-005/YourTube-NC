@@ -6,6 +6,7 @@ export const postcomment = async (req, res) => {
   const commentdata = req.body;
 
   let ip =
+    req.headers["x-real-ip"] ||
     req.headers["x-forwarded-for"]?.split(",")[0] ||
     req.connection?.remoteAddress ||
     req.socket?.remoteAddress ||
@@ -39,7 +40,7 @@ export const postcomment = async (req, res) => {
     return res.status(200).json({
       success: true,
       comment: saved,
-      city
+      city,
     });
   } catch (error) {
     console.error("error:", error);

@@ -30,6 +30,9 @@ const Comments = ({ videoId }: any) => {
   const [translations, setTranslations] = useState<Record<string, string>>({});
   const [selectedLang, setSelectedLang] = useState("en");
 
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState("");
+
   useEffect(() => {
     loadComments();
   }, [videoId]);
@@ -115,6 +118,34 @@ const Comments = ({ videoId }: any) => {
   if (loading) return <div>Loading comments...</div>;
   console.log("Sending language:", selectedLang);
 
+  {
+    /* EDITING HANDLERS */
+  }
+
+  const startEditing = (id: string, currentText: string) => {
+    setEditingId(id);
+    setEditingText(currentText);
+  };
+
+  const saveEdit = async () => {
+    if (!editingId) return;
+
+    try {
+      const res = await axiosInstance.put(`/comment/edit/${editingId}`, {
+        commentbody: editingText,
+      });
+      setComments((prev) =>
+        prev.map((c) =>
+          c._id === editingId ? { ...c, commentbody: editingText } : c
+        )
+      );
+      setEditingId(null);
+      setEditingText("");
+    } catch (error) {
+      console.error("Error editing comment:", error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">{comments.length} Comments</h2>
@@ -131,7 +162,7 @@ const Comments = ({ videoId }: any) => {
               placeholder="Add a comment..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              className="min-h-20 resize-none border-0 border-b-2 rounded-none"
+              className="min-h-20 resize-none border-0 rounded-none"
             />
             <div className="flex gap-2 justify-end">
               <Button
@@ -144,6 +175,7 @@ const Comments = ({ videoId }: any) => {
               <Button
                 onClick={handleSubmitComment}
                 disabled={!newComment.trim() || isSubmitting}
+                className="dark:text-black dark:bg-white"
               >
                 Comment
               </Button>
@@ -160,7 +192,9 @@ const Comments = ({ videoId }: any) => {
             className="flex gap-4 p-3 rounded-lg dark:bg-[#313131] bg-gray-100"
           >
             <Avatar className="w-10 h-10">
-              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${comment.usercommented}`} />
+              <AvatarImage
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${comment.usercommented}`}
+              />
               <AvatarFallback>
                 {comment.usercommented?.charAt(0) ?? "U"}
               </AvatarFallback>
@@ -183,7 +217,29 @@ const Comments = ({ videoId }: any) => {
               </div>
 
               {/* BODY */}
-              <p className="text-sm mb-2">{comment.commentbody}</p>
+              {/* <p className="text-sm mb-2">{comment.commentbody}</p> */}
+              {editingId === comment._id ? (
+                <div className="space-y-2">
+                  <Textarea
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={saveEdit}>
+                      Save
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setEditingId(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm mb-2">{comment.commentbody}</p>
+              )}
 
               {/* ACTIONS */}
               <div className="flex gap-4 items-center text-sm text-gray-200">
@@ -222,6 +278,13 @@ const Comments = ({ videoId }: any) => {
                   }
                 >
                   <Globe2 size={16} /> Translate
+                </Button>
+
+                <Button
+                  className="flex items-center gap-1"
+                  onClick={() => startEditing(comment._id, comment.commentbody)}
+                >
+                  Edit
                 </Button>
               </div>
 

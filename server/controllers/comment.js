@@ -5,28 +5,31 @@ import axios from "axios";
 export const postcomment = async (req, res) => {
   const commentdata = req.body;
 
-  let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  let ip =
+    req.headers["x-forwarded-for"]?.split(",")[0] ||
+    req.connection?.remoteAddress ||
+    req.socket?.remoteAddress ||
+    req.ip;
 
-  if (ip === "::1" || ip === "127.0.0.1") {
-    ip = "8.8.8.8"; // Test IP
+  if (!ip || ip.includes("::1") || ip.includes("127.0.0.1")) {
+    ip = "8.8.8.8"; // fallback for localhost
   }
 
+  console.log("User IP:", ip);
+
   let city = "Unknown";
+
   try {
     const response = await fetch(`https://ipapi.co/${ip}/json/`);
-    const info = await response.json();
-    if (info && info.city) city = info.city;
+    const data = await response.json();
+
+    if (data && data.city) city = data.city;
   } catch (err) {
     console.log("City fetch failed:", err);
   }
 
-  // 🔥 GET USER NAME
-  const userModel = mongoose.model("user");
-  const userInfo = await userModel.findById(commentdata.userid);
-
   const newComment = new comment({
     ...commentdata,
-    usercommented: userInfo?.username || userInfo?.name || "User",
     city,
   });
 
@@ -36,7 +39,7 @@ export const postcomment = async (req, res) => {
     return res.status(200).json({
       success: true,
       comment: saved,
-      city,
+      city
     });
   } catch (error) {
     console.error("error:", error);

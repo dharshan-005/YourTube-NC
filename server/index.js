@@ -32,6 +32,8 @@ app.listen(PORT, () => {
   console.log(`server running on port ${PORT}`);
 });
 
+app.set("trust proxy", true); 
+
 const DBURL = process.env.MONGO_URI;
 mongoose
   .connect(DBURL)

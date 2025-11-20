@@ -52,12 +52,12 @@ const Sidebar = ({ className, collapsed, isOpen, setIsOpen }: SidebarProps) => {
         </svg>
       </button> */}
       <aside
-        className={`fixed md:static top-0 left-0 z-40 h-screen bg-white dark:bg-black dark:text-white border-r p-2 transform transition-transform ${
+        className={`fixed md:static top-0 left-0 z-40 h-screen w-1/2 bg-white dark:bg-black dark:text-white border-r p-2 transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } ${collapsed ? "md:w-20" : "md:w-64"} md:translate-x-0 ${className}`}
       >
         <button
-          className="md:hidden absolute top-4 right-4 text-2xl"
+          className="md:hidden absolute top-2 right-4 text-2xl"
           onClick={() => setIsOpen(false)}
         >
           ✕

@@ -32,7 +32,7 @@ app.listen(PORT, () => {
   console.log(`server running on port ${PORT}`);
 });
 
-const DBURL = process.env.DB_URL;
+const DBURL = process.env.MONGO_URI;
 mongoose
   .connect(DBURL)
   .then(() => {

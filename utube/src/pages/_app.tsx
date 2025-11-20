@@ -25,7 +25,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <Toaster />
         <div className="flex flex-col md:flex-row">
           <Sidebar
-            className="w-full md:w-64"
+            className="md:w-64"
             collapsed={collapsed}
             isOpen={sidebarOpen}
             setIsOpen={setSidebarOpen}

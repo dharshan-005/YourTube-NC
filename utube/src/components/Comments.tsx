@@ -5,6 +5,9 @@ import { Button } from "./ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { useUser } from "@/lib/AuthContext";
 import axiosInstance from "@/lib/axiosinstance";
+import { Globe2, ThumbsUp, ThumbsDown } from "lucide-react";
+import axios from "axios";
+
 interface Comment {
   _id: string;
   videoid: string;
@@ -12,33 +15,21 @@ interface Comment {
   commentbody: string;
   usercommented: string;
   commentedon: string;
+  city?: string;
+  likes?: string[];
+  dislikes?: string[];
 }
+
 const Comments = ({ videoId }: any) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
-  const [editText, setEditText] = useState("");
-  const { user } = useUser();
   const [loading, setLoading] = useState(true);
-  const fetchedComments = [
-    {
-      _id: "1",
-      videoid: videoId,
-      userid: "1",
-      commentbody: "Great video! Really enjoyed watching this.",
-      usercommented: "John Doe",
-      commentedon: new Date(Date.now() - 3600000).toISOString(),
-    },
-    {
-      _id: "2",
-      videoid: videoId,
-      userid: "2",
-      commentbody: "Thanks for sharing this amazing content!",
-      usercommented: "Jane Smith",
-      commentedon: new Date(Date.now() - 7200000).toISOString(),
-    },
-  ];
+  const { user } = useUser();
+
+  const [translations, setTranslations] = useState<Record<string, string>>({});
+  const [selectedLang, setSelectedLang] = useState("en");
+
   useEffect(() => {
     loadComments();
   }, [videoId]);
@@ -53,9 +44,7 @@ const Comments = ({ videoId }: any) => {
       setLoading(false);
     }
   };
-  if (loading) {
-    return <div>Loading history...</div>;
-  }
+
   const handleSubmitComment = async () => {
     if (!user || !newComment.trim()) return;
 
@@ -65,20 +54,14 @@ const Comments = ({ videoId }: any) => {
         videoid: videoId,
         userid: user._id,
         commentbody: newComment,
-        usercommented: user.name,
       });
+
       if (res.data.comment) {
-        const newCommentObj: Comment = {
-          _id: Date.now().toString(),
-          videoid: videoId,
-          userid: user._id,
-          commentbody: newComment,
-          usercommented: user.name || "Anonymous",
-          commentedon: new Date().toISOString(),
-        };
-        setComments([newCommentObj, ...comments]);
+        setComments([res.data.comment, ...comments]);
       }
+
       setNewComment("");
+      console.log("City:", res.data.comment.city);
     } catch (error) {
       console.error("Error adding comment:", error);
     } finally {
@@ -86,46 +69,57 @@ const Comments = ({ videoId }: any) => {
     }
   };
 
-  const handleEdit = (comment: Comment) => {
-    setEditingCommentId(comment._id);
-    setEditText(comment.commentbody);
+  const handleLike = async (id: string) => {
+    try {
+      const res = await axiosInstance.post(`/comment/like/${id}`, {
+        userid: user?._id,
+      });
+      setComments(res.data);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  const handleUpdateComment = async () => {
-    if (!editText.trim()) return;
+  const handleDislike = async (id: string) => {
     try {
-      const res = await axiosInstance.post(
-        `/comment/editcomment/${editingCommentId}`,
-        { commentbody: editText }
+      const res = await axiosInstance.post(`/comment/dislike/${id}`, {
+        userid: user?._id,
+      });
+      setComments(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleTranslate = async (commentId: string, text: string) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/comment/translate",
+        {
+          commentText: text,
+          targetLanguage: selectedLang,
+        }
       );
-      if (res.data) {
-        setComments((prev) =>
-          prev.map((c) =>
-            c._id === editingCommentId ? { ...c, commentbody: editText } : c
-          )
-        );
-        setEditingCommentId(null);
-        setEditText("");
-      }
+
+      // console.log("Translated:", response.data.translatedText);
+      // setTranslated(response.data.translatedText);
+      setTranslations((prev) => ({
+        ...prev,
+        [commentId]: response.data.translatedText,
+      }));
     } catch (error) {
-      console.log(error);
+      console.error("Translate error:", error);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      const res = await axiosInstance.delete(`/comment/deletecomment/${id}`);
-      if (res.data.comment) {
-        setComments((prev) => prev.filter((c) => c._id !== id));
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  if (loading) return <div>Loading comments...</div>;
+  console.log("Sending language:", selectedLang);
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">{comments.length} Comments</h2>
 
+      {/* COMMENT INPUT */}
       {user && (
         <div className="flex gap-4">
           <Avatar className="w-10 h-10">
@@ -136,8 +130,8 @@ const Comments = ({ videoId }: any) => {
             <Textarea
               placeholder="Add a comment..."
               value={newComment}
-              onChange={(e: any) => setNewComment(e.target.value)}
-              className="min-h-20 resize-none border-0 border-b-2 rounded-none focus-visible:ring-0"
+              onChange={(e) => setNewComment(e.target.value)}
+              className="min-h-20 resize-none border-0 border-b-2 rounded-none"
             />
             <div className="flex gap-2 justify-end">
               <Button
@@ -157,71 +151,89 @@ const Comments = ({ videoId }: any) => {
           </div>
         </div>
       )}
-      <div className="space-y-4">
-        {comments.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">
-            No comments yet. Be the first to comment!
-          </p>
-        ) : (
-          comments.map((comment) => (
-            <div key={comment._id} className="flex gap-4">
-              <Avatar className="w-10 h-10">
-                <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                <AvatarFallback>{comment.usercommented[0]}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-sm">
-                    {comment.usercommented}
-                  </span>
-                  <span className="text-xs text-gray-600">
-                    {formatDistanceToNow(new Date(comment.commentedon))} ago
-                  </span>
-                </div>
 
-                {editingCommentId === comment._id ? (
-                  <div className="space-y-2">
-                    <Textarea
-                      value={editText}
-                      onChange={(e) => setEditText(e.target.value)}
-                    />
-                    <div className="flex gap-2 justify-end">
-                      <Button
-                        onClick={handleUpdateComment}
-                        disabled={!editText.trim()}
-                      >
-                        Save
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          setEditingCommentId(null);
-                          setEditText("");
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <p className="text-sm">{comment.commentbody}</p>
-                    {comment.userid === user?._id && (
-                      <div className="flex gap-2 mt-2 text-sm text-gray-500">
-                        <button onClick={() => handleEdit(comment)}>
-                          Edit
-                        </button>
-                        <button onClick={() => handleDelete(comment._id)}>
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </>
+      {/* COMMENTS LIST */}
+      <div className="space-y-4">
+        {comments.map((comment) => (
+          <div
+            key={comment._id}
+            className="flex gap-4 p-3 rounded-lg dark:bg-[#313131] bg-gray-100"
+          >
+            <Avatar className="w-10 h-10">
+              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${comment.usercommented}`} />
+              <AvatarFallback>
+                {comment.usercommented?.charAt(0) ?? "U"}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="flex-1">
+              {/* HEADER */}
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-medium text-sm">
+                  {comment.usercommented || "Unknown User"}
+                </span>
+                <span className="text-xs text-gray-200">
+                  {formatDistanceToNow(new Date(comment.commentedon))} ago
+                </span>
+                {comment.city && (
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded-full">
+                    {comment.city}
+                  </span>
                 )}
               </div>
+
+              {/* BODY */}
+              <p className="text-sm mb-2">{comment.commentbody}</p>
+
+              {/* ACTIONS */}
+              <div className="flex gap-4 items-center text-sm text-gray-200">
+                <button
+                  className="flex items-center gap-1"
+                  onClick={() => handleLike(comment._id)}
+                >
+                  <ThumbsUp size={16} /> {comment.likes?.length || 0}
+                </button>
+
+                <button
+                  className="flex items-center gap-1"
+                  onClick={() => handleDislike(comment._id)}
+                >
+                  <ThumbsDown size={16} /> {comment.dislikes?.length || 0}
+                </button>
+
+                <select
+                  className="border rounded px-2 py-1 dark:text-white dark:bg-[#313131]"
+                  value={selectedLang}
+                  onChange={(e) => setSelectedLang(e.target.value)}
+                >
+                  <option value="en">English</option>
+                  <option value="hi">Hindi</option>
+                  <option value="ta">Tamil</option>
+                  <option value="te">Telugu</option>
+                  <option value="ml">Malayalam</option>
+                  <option value="kn">Kannada</option>
+                </select>
+
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() =>
+                    handleTranslate(comment._id, comment.commentbody)
+                  }
+                >
+                  <Globe2 size={16} /> Translate
+                </Button>
+              </div>
+
+              {/* TRANSLATED TEXT FOR THIS COMMENT ONLY */}
+              {translations[comment._id] && (
+                <p className="mt-2 text-sm italic text-blue-600">
+                  {translations[comment._id]}
+                </p>
+              )}
             </div>
-          ))
-        )}
+          </div>
+        ))}
       </div>
     </div>
   );

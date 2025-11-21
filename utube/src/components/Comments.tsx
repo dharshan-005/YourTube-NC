@@ -290,8 +290,8 @@ const Comments = ({ videoId }: any) => {
 
               {/* TRANSLATED TEXT FOR THIS COMMENT ONLY */}
               {translations[comment._id] && (
-                <p className="mt-2 text-sm italic text-blue-600">
-                  {translations[comment._id]}
+                <p className="mt-2 text-sm italic text-white">
+                  Translated: {translations[comment._id]}
                 </p>
               )}
             </div>

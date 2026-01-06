@@ -1,11 +1,40 @@
 import mongoose from "mongoose";
-const userschema = mongoose.Schema({
-  email: { type: String, required: true },
-  name: { type: String },
-  channelname: { type: String },
-  description: { type: String },
-  image: { type: String },
-  joinedon: { type: Date, default: Date.now },
+// const userschema = mongoose.Schema({
+//   email: { type: String, required: true },
+//   name: { type: String },
+//   channelname: { type: String },
+//   description: { type: String },
+//   image: { type: String },
+//   joinedon: { type: Date, default: Date.now },
+// });
+
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  password: String,
+
+  isPremium: {
+    type: Boolean,
+    default: false,
+  },
+
+  downloadsToday: {
+    type: Number,
+    default: 0,
+  },
+
+  lastDownloadDate: {
+    type: Date,
+  },
+
+  downloadedVideos: [
+    {
+      videoId: mongoose.Schema.Types.ObjectId,
+      title: String,
+      thumbnail: String,
+      downloadedAt: Date,
+    },
+  ],
 });
 
-export default mongoose.model("user", userschema);
+export default mongoose.model("user", userSchema);

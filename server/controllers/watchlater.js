@@ -16,8 +16,8 @@ export const handlewatchlater = async (req, res) => {
       return res.status(200).json({ watchlater: true });
     }
   } catch (error) {
-    console.error(" error:", error);
-    return res.status(500).json({ message: "Something went wrong" });
+    console.error("Watchlater error:", error);
+    return res.status(500).json({ message: "Something went wrong while processing the watchlater" });
   }
 };
 
@@ -33,7 +33,7 @@ export const getallwatchlater = async (req, res) => {
       .exec();
     return res.status(200).json(watchlatervideo);
   } catch (error) {
-    console.error(" error:", error);
-    return res.status(500).json({ message: "Something went wrong" });
+    console.error("Get all watchlater videos error:", error);
+    return res.status(500).json({ message: "Something went wrong while retrieving watchlater videos" });
   }
 };

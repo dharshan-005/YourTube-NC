@@ -9,8 +9,10 @@ export const handlehistory = async (req, res) => {
     await video.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
     return res.status(200).json({ history: true });
   } catch (error) {
-    console.error(" error:", error);
-    return res.status(500).json({ message: "Something went wrong" });
+    console.error("History error:", error);
+    return res
+      .status(500)
+      .json({ message: "Something went wrong while processing history" });
   }
 };
 export const handleview = async (req, res) => {
@@ -18,8 +20,10 @@ export const handleview = async (req, res) => {
   try {
     await video.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
   } catch (error) {
-    console.error(" error:", error);
-    return res.status(500).json({ message: "Something went wrong" });
+    console.error("View error:", error);
+    return res
+      .status(500)
+      .json({ message: "Something went wrong while processing view" });
   }
 };
 export const getallhistoryVideo = async (req, res) => {
@@ -34,7 +38,16 @@ export const getallhistoryVideo = async (req, res) => {
       .exec();
     return res.status(200).json(historyvideo);
   } catch (error) {
-    console.error(" error:", error);
-    return res.status(500).json({ message: "Something went wrong" });
+    console.error("Get all history videos error:", error);
+    return res
+      .status(500)
+      .json({
+        message: "Something went wrong while retrieving history videos",
+      });
   }
+};
+
+export const getDownloadHistory = async (req, res) => {
+  const user = await Auth.findById(req.user.id);
+  res.json(user.downloadedVideos);
 };

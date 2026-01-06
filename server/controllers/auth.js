@@ -164,7 +164,7 @@ export const login = async (req, res) => {
     }
   } catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({ message: "Something went wrong" });
+    return res.status(500).json({ message: "Something went wrong while logging in" });
   }
 };
 export const updateprofile = async (req, res) => {
@@ -186,7 +186,7 @@ export const updateprofile = async (req, res) => {
     );
     return res.status(201).json(updatedata);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Something went wrong" });
+    console.error("Update profile error:", error);
+    return res.status(500).json({ message: "Something went wrong while updating the profile" });
   }
 };

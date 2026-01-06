@@ -111,6 +111,36 @@ const VideoInfo = ({ video }: any) => {
       console.log(error);
     }
   };
+
+  // Download
+  const handleDownload = async () => {
+    if (!user) {
+      alert("Please login to download the video.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const downloadUrl = `${process.env.BACKEND_URL}/video/download/${video._id}`;
+
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.setAttribute("download", "");
+      link.setAttribute("target", "_blank");
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error: any) {
+      if (error?.response?.status === 403) {
+        alert("Daily limit reached. Go Premium!");
+      } else {
+        alert("Download failed!");
+      }
+    }
+  };
+
   return (
     <div className="space-y-4 text-black dark:text-white">
       <h1 className="text-xl font-semibold">{video.videotitle}</h1>
@@ -167,7 +197,8 @@ const VideoInfo = ({ video }: any) => {
           <Button
             variant="ghost"
             size="sm"
-            className="bg-gray-100 rounded-full "
+            className="bg-gray-100 rounded-full"
+            onClick={handleDownload}
           >
             <Download className="w-5 h-5 mr-2" />
             Download
@@ -199,7 +230,16 @@ const VideoInfo = ({ video }: any) => {
         </div>
         <div className={`text-sm ${showFullDescription ? "" : "line-clamp-3"}`}>
           <p>
-            Sample video description. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Autem aut totam quisquam quibusdam saepe voluptatem consectetur dolor, natus voluptatibus debitis molestias nam soluta quidem hic obcaecati ipsam, incidunt cupiditate. Sint facilis iusto, incidunt a exercitationem sequi sed nulla consectetur itaque magni rem maiores pariatur, nemo mollitia dolorem, minima vero! Totam blanditiis quos, consequatur vel illum incidunt labore, dolor soluta officiis deserunt odit? Cumque est officiis sequi necessitatibus obcaecati dolor expedita eaque tenetur! Perspiciatis, nihil vero.
+            Sample video description. Lorem ipsum dolor sit amet, consectetur
+            adipisicing elit. Autem aut totam quisquam quibusdam saepe
+            voluptatem consectetur dolor, natus voluptatibus debitis molestias
+            nam soluta quidem hic obcaecati ipsam, incidunt cupiditate. Sint
+            facilis iusto, incidunt a exercitationem sequi sed nulla consectetur
+            itaque magni rem maiores pariatur, nemo mollitia dolorem, minima
+            vero! Totam blanditiis quos, consequatur vel illum incidunt labore,
+            dolor soluta officiis deserunt odit? Cumque est officiis sequi
+            necessitatibus obcaecati dolor expedita eaque tenetur! Perspiciatis,
+            nihil vero.
           </p>
         </div>
         <Button

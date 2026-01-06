@@ -36,3 +36,5 @@ export default function VideoCard({ video }: any) {
     </Link>
   );
 }
+
+// <a href={`/api/video/download/${videoId}`}>Download</a>

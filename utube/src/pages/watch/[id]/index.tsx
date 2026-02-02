@@ -16,16 +16,16 @@ const WatchPage = () => {
   const [allVideos, setAllVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const videoId = typeof id === "string" ? id : null;
+
   useEffect(() => {
-    if (!id || typeof id !== "string") return;
+    if (!videoId) return;
 
     const fetchVideos = async () => {
       try {
         const res = await axiosInstance.get("/video/getall");
 
-        const foundVideo = res.data.find(
-          (vid: any) => vid._id === id
-        );
+        const foundVideo = res.data.find((vid: any) => vid._id === id);
 
         setCurrentVideo(foundVideo || null);
         setAllVideos(res.data);
@@ -37,7 +37,7 @@ const WatchPage = () => {
     };
 
     fetchVideos();
-  }, [id]);
+  }, [videoId]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -57,7 +57,7 @@ const WatchPage = () => {
 
             <VideoInfo video={currentVideo} />
 
-            <Comments videoId={id} />
+            {videoId && <Comments videoId={videoId} />}
           </div>
 
           <div className="space-y-4">
@@ -70,7 +70,6 @@ const WatchPage = () => {
 };
 
 export default WatchPage;
-
 
 // 'use client';
 
@@ -107,7 +106,7 @@ export default WatchPage;
 //   if (loading) {
 //     return <div>Loading..</div>;
 //   }
-  
+
 //   if (!videos) {
 //     return <div>Video not found</div>;
 //   }

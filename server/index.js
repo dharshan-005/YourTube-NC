@@ -18,7 +18,7 @@ import path from "path";
 
 app.use(
   cors({
-    origin: "http://localhost:3000", // frontend URL
+    origin: ["http://localhost:3000", "https://your-tube-nc.vercel.app"], // frontend URL
     credentials: true,              // allow cookies / auth headers
     methods: ["GET", "POST","PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],

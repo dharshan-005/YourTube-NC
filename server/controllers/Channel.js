@@ -1,4 +1,4 @@
-import Channel from "../Modals/Channel.js";
+import Channel from "../models/Channel.js";
 
 export const createChannel = async (req, res) => {
   const { name, description } = req.body;

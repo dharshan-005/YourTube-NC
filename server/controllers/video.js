@@ -1,8 +1,8 @@
-import Auth from "../Modals/Auth.js";
+import Auth from "../models/Auth.js";
 import path from "path";
 import fs from "fs";
 
-import video from "../Modals/video.js";
+import video from "../models/video.js";
 
 export const uploadvideo = async (req, res) => {
   if (!req.file) {
@@ -96,6 +96,8 @@ export const downloadVideo = async (req, res) => {
 export const getVideosByUser = async (req, res) => {
   try {
     const { id } = req.params;
+
+    console.log("VIDEO MODEL:", video);
 
     const videos = await video
       .find({ uploader: id })

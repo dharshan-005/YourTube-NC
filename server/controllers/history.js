@@ -1,5 +1,5 @@
-import video from "../Modals/video.js";
-import history from "../Modals/history.js";
+import video from "../models/video.js";
+import history from "../models/history.js";
 
 export const handlehistory = async (req, res) => {
   const { userId } = req.body;

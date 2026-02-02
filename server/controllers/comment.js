@@ -1,4 +1,4 @@
-import Comment from "../Modals/comment.js";
+import Comment from "../models/comment.js";
 import axios from "axios";
 
 const allowedRegex = /^[A-Za-z0-9\s.,!?'"()\-:;]+$/;

@@ -1,6 +1,6 @@
 import express from "express";
 import geoip from "geoip-lite";
-import Comment from "../Modals/comment.js";
+import Comment from "../models/comment.js";
 import {
   postcomment,
   getallcomment,

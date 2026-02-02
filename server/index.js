@@ -4,15 +4,27 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import userroutes from "./routes/auth.js";
+import channelRoutes from "./routes/channel.js"
 import videoroutes from "./routes/video.js";
 import likeroutes from "./routes/like.js";
 import watchlaterroutes from "./routes/watchlater.js";
 import historyrroutes from "./routes/history.js";
 import commentroutes from "./routes/comment.js";
 dotenv.config();
+
 const app = express();
+
 import path from "path";
-app.use(cors());
+
+app.use(
+  cors({
+    origin: "http://localhost:3000", // frontend URL
+    credentials: true,              // allow cookies / auth headers
+    methods: ["GET", "POST","PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json({ limit: "30mb", extended: true }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
 app.use("/uploads", express.static(path.join("uploads")));
@@ -21,6 +33,7 @@ app.get("/", (req, res) => {
 });
 app.use(bodyParser.json());
 app.use("/user", userroutes);
+app.use("/channel", channelRoutes);
 app.use("/video", videoroutes);
 app.use("/like", likeroutes);
 app.use("/watch", watchlaterroutes);

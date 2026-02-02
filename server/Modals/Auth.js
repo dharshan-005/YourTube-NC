@@ -13,6 +13,9 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String,
 
+  channelname: { type: String },
+  description: { type: String },
+
   isPremium: {
     type: Boolean,
     default: false,

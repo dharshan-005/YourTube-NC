@@ -15,12 +15,13 @@ import Channeldialogue from "./channeldialogue";
 import { useRouter } from "next/router";
 import { useUser } from "@/lib/AuthContext";
 import Sidebar from "./Sidebar";
+import { channel } from "diagnostics_channel";
 
 interface HeaderProps {
   onMenuClick: () => void;
-} 
+}
 
-const Header = ( { onMenuClick }: HeaderProps) => {
+const Header = ({ onMenuClick }: HeaderProps) => {
   const [sideCollapsed, setSideCollapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -196,7 +197,11 @@ const Header = ( { onMenuClick }: HeaderProps) => {
                         variant="secondary"
                         size="sm"
                         className="w-full"
-                        onClick={() => setisdialogeopen(true)}
+                        onClick={() => {
+                          if (!user?.channelname) {
+                            setisdialogeopen(true);
+                          }
+                        }}
                       >
                         Create Channel
                       </Button>

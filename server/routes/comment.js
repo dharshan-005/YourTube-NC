@@ -1,67 +1,33 @@
 import express from "express";
+import geoip from "geoip-lite";
+import Comment from "../Modals/comment.js";
 import {
-  deletecomment,
-  getallcomment,
   postcomment,
+  getallcomment,
   editcomment,
   translateComment,
+  dislikeComment,
 } from "../controllers/comment.js";
-import Comment from "../Modals/comment.js";
-import geoip from "geoip-lite";
 
 const router = express.Router();
 
-// POST COMMENT WITH CITY
 router.post("/postcomment", async (req, res) => {
-  try {
-    const ip =
-      req.headers["x-forwarded-for"]?.split(",")[0] ||
-      req.socket.remoteAddress;
+  const ip =
+    req.headers["x-forwarded-for"]?.split(",")[0] ||
+    req.socket.remoteAddress;
 
-    const geo = geoip.lookup(ip);
-    const city = geo?.city || "Unknown";
+  const geo = geoip.lookup(ip);
+  req.body.city = geo?.city || "Unknown";
 
-    const comment = await Comment.create({
-      videoid: req.body.videoid,
-      userid: req.body.userid,
-      commentbody: req.body.commentbody,
-      usercommented: req.body.usercommented || "Unknown User",
-      city: city,
-    });
-
-    res.json({ comment });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: "Error posting comment" });
-  }
+  postcomment(req, res);
 });
 
-// DELETE COMMENT
-router.delete("/deletecomment/:id", deletecomment);
-
-// EDIT COMMENT
-router.put("/edit/:id", async (req, res) => {
-  try {
-    const updated = await Comment.findByIdAndUpdate(
-      req.params.id,
-      { commentbody: req.body.commentbody },
-      { new: true }
-    );
-
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to update" });
-  }
-});
-
-// TRANSLATE COMMENT
+router.put("/edit/:id", editcomment);
+router.put("/dislike/:id", dislikeComment);
 router.post("/translate", translateComment);
-
-// GET ALL COMMENTS
 router.get("/:videoid", getallcomment);
 
 export default router;
-
 
 // import express from "express";
 // import {
@@ -70,11 +36,14 @@ export default router;
 //   postcomment,
 //   editcomment,
 //   translateComment,
+//   dislikeComment,
 // } from "../controllers/comment.js";
+// import Comment from "../Modals/comment.js";
 // import geoip from "geoip-lite";
 
-// const routes = express.Router();
+// const router = express.Router();
 
+// // POST COMMENT WITH CITY
 // router.post("/postcomment", async (req, res) => {
 //   try {
 //     const ip =
@@ -87,7 +56,7 @@ export default router;
 //       videoid: req.body.videoid,
 //       userid: req.body.userid,
 //       commentbody: req.body.commentbody,
-//       usercommented: req.user?.name || "Unknown User",
+//       usercommented: req.body.usercommented || "Unknown User",
 //       city: city,
 //     });
 
@@ -98,14 +67,16 @@ export default router;
 //   }
 // });
 
-// routes.delete("/deletecomment/:id", deletecomment);
-// // routes.post("/editcomment/:id", editcomment);
+// // DELETE COMMENT
+// router.delete("/deletecomment/:id", deletecomment);
+
+// // EDIT COMMENT
 // router.put("/edit/:id", async (req, res) => {
 //   try {
 //     const updated = await Comment.findByIdAndUpdate(
 //       req.params.id,
 //       { commentbody: req.body.commentbody },
-//       { new: true }
+//       { new: true },
 //     );
 
 //     res.json(updated);
@@ -114,6 +85,12 @@ export default router;
 //   }
 // });
 
-// routes.post("/translate", translateComment);
-// routes.get("/:videoid", getallcomment);
-// export default routes;
+// // TRANSLATE COMMENT
+// router.post("/translate", translateComment);
+
+// router.put("/dislike/:id", dislikeComment);
+
+// // GET ALL COMMENTS
+// router.get("/:videoid", getallcomment);
+
+// export default router;

@@ -12,7 +12,7 @@ const commentschema = mongoose.Schema(
       required: true,
     },
     commentbody: { type: String },
-    usercommented: { type: String },
+    usercommented: { type: String, required: true },
     commentedon: { type: Date, default: Date.now },
 
     city: {
@@ -22,11 +22,11 @@ const commentschema = mongoose.Schema(
     dislikes: {
       type: Number,
       default: 0,
-    }
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default mongoose.model("comment", commentschema);

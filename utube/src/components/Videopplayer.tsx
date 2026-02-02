@@ -13,7 +13,6 @@ interface VideoPlayerProps {
 
 export default function VideoPlayer({ videos }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  // const videos = "/video/vdo.mp4";
   const [currentIndex, setCurrentIndex] = useState(0);
   const [tapCount, setTapCount] = useState(0);
   const [tapTimeout, setTapTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -105,7 +104,7 @@ export default function VideoPlayer({ videos }: VideoPlayerProps) {
         poster={`/placeholder.svg?height=480&width=854`}
       >
         <source
-          src={`${process.env.BACKEND_URL}/${videos[currentIndex]?.filepath}`}
+          src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${videos[currentIndex]?.filepath}`}
           type="video/mp4"
         />
         Your browser does not support the video tag.

@@ -5,36 +5,38 @@ import fs from "fs";
 import video from "../Modals/video.js";
 
 export const uploadvideo = async (req, res) => {
-  if (req.file === undefined) {
-    return res
-      .status(404)
-      .json({ message: "plz upload a mp4 video file only" });
-  } else {
-    try {
-      const file = new video({
-        videotitle: req.body.videotitle,
-        filename: req.file.originalname,
-        filepath: req.file.path,
-        filetype: req.file.mimetype,
-        filesize: req.file.size,
-        videochanel: req.body.videochanel,
-        uploader: req.body.uploader,
-      });
-      await file.save();
-      return res.status(201).json("file uploaded successfully");
-    } catch (error) {
-      console.error("Upload error:", error);
-      return res.status(500).json({ message: "Something went wrong while uploading the video" });
-    }
+  if (!req.file) {
+    return res.status(400).json({ message: "Please upload a video file" });
+  }
+
+  try {
+    const newVideo = new video({
+      videotitle: req.body.videotitle,
+      filename: req.file.originalname,
+      filepath: req.file.path,
+      filetype: req.file.mimetype,
+      filesize: req.file.size,
+      videochanel: req.body.videochanel || "",
+      uploader: req.user.id, // ✅ FROM JWT (IMPORTANT)
+    });
+
+    await newVideo.save();
+    return res.status(201).json(newVideo);
+  } catch (error) {
+    console.error("Upload error:", error);
+    return res.status(500).json({ message: "Video upload failed" });
   }
 };
+
 export const getallvideo = async (req, res) => {
   try {
     const files = await video.find();
     return res.status(200).send(files);
   } catch (error) {
     console.error("Retrieval error:", error);
-    return res.status(500).json({ message: "Something went wrong with the video retrieval" });
+    return res
+      .status(500)
+      .json({ message: "Something went wrong with the video retrieval" });
   }
 };
 
@@ -65,7 +67,9 @@ export const downloadVideo = async (req, res) => {
 
     // ---- File exists check ----
     if (!fs.existsSync(file.filepath)) {
-      return res.status(404).json({ message: "Video file not found on server" });
+      return res
+        .status(404)
+        .json({ message: "Video file not found on server" });
     }
 
     // ---- Update user download data ----
@@ -88,3 +92,19 @@ export const downloadVideo = async (req, res) => {
     res.status(500).json({ message: "Video download failed" });
   }
 };
+
+export const getVideosByUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const videos = await video
+      .find({ uploader: id })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(videos);
+  } catch (error) {
+    console.error("Get videos by user error:", error);
+    res.status(500).json({ message: "Failed to fetch user videos" });
+  }
+};
+

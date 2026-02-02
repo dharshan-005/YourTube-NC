@@ -126,7 +126,7 @@ const Sidebar = ({ className, collapsed, isOpen, setIsOpen }: SidebarProps) => {
                   </Button>
                 </Link>
                 {user?.channelname ? (
-                  <Link href={`/channel/${user.id}`}>
+                  <Link href={`/channel/${user._id}`}>
                     <Button
                       variant="ghost"
                       className="w-full justify-start text-gray-900 dark:text-gray-100"
@@ -143,7 +143,11 @@ const Sidebar = ({ className, collapsed, isOpen, setIsOpen }: SidebarProps) => {
                       variant="secondary"
                       size="sm"
                       className="w-full"
-                      onClick={() => setisdialogeopen(true)}
+                      onClick={() => {
+                        if (!user?.channelname) {
+                          setisdialogeopen(true);
+                        }
+                      }}
                     >
                       Create Channel
                     </Button>

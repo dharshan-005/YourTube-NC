@@ -58,17 +58,18 @@ const VideoUploader = ({ channelId, channelName }: any) => {
     formdata.append("videotitle", videoTitle);
     formdata.append("videochanel", channelName);
     formdata.append("uploader", channelId);
-    console.log(formdata)
+    // console.log(formdata);
+    for (let [key, value] of formdata.entries()) {
+      console.log(key, value);
+    }
+
     try {
       setIsUploading(true);
       setUploadProgress(0);
       const res = await axiosInstance.post("/video/upload", formdata, {
-         headers: {
-    "Content-Type": "multipart/form-data", // ✅ MUST for FormData
-  },
         onUploadProgress: (progresEvent: any) => {
           const progress = Math.round(
-            (progresEvent.loaded * 100) / progresEvent.total
+            (progresEvent.loaded * 100) / progresEvent.total,
           );
           setUploadProgress(progress);
         },

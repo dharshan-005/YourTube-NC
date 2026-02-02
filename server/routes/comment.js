@@ -1,6 +1,5 @@
 import express from "express";
 import geoip from "geoip-lite";
-import Comment from "../models/comment.js";
 import {
   postcomment,
   getallcomment,
@@ -11,13 +10,39 @@ import {
 
 const router = express.Router();
 
-router.post("/postcomment", async (req, res) => {
-  const ip =
-    req.headers["x-forwarded-for"]?.split(",")[0] ||
+function getClientIp(req) {
+  let ip =
+    req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+    req.headers["x-real-ip"] ||
+    req.ip ||
     req.socket.remoteAddress;
 
-  const geo = geoip.lookup(ip);
-  req.body.city = geo?.city || "Unknown";
+  // IPv6-mapped IPv4 fix
+  if (ip && ip.startsWith("::ffff:")) {
+    ip = ip.replace("::ffff:", "");
+  }
+
+  return ip;
+}
+
+router.post("/postcomment", async (req, res) => {
+  const ip = getClientIp(req);
+
+  let city = "Unknown";
+
+  // Localhost handling (DEV only)
+  if (
+    ip === "127.0.0.1" ||
+    ip === "::1" ||
+    ip?.includes("127.0.0.1")
+  ) {
+    city = "Localhost";
+  } else {
+    const geo = geoip.lookup(ip);
+    city = geo?.city || "Unknown";
+  }
+
+  req.body.city = city;
 
   postcomment(req, res);
 });
@@ -30,67 +55,32 @@ router.get("/:videoid", getallcomment);
 export default router;
 
 // import express from "express";
+// import geoip from "geoip-lite";
+// import Comment from "../models/comment.js";
 // import {
-//   deletecomment,
-//   getallcomment,
 //   postcomment,
+//   getallcomment,
 //   editcomment,
 //   translateComment,
 //   dislikeComment,
 // } from "../controllers/comment.js";
-// import Comment from "../Modals/comment.js";
-// import geoip from "geoip-lite";
 
 // const router = express.Router();
 
-// // POST COMMENT WITH CITY
 // router.post("/postcomment", async (req, res) => {
-//   try {
-//     const ip =
-//       req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
+//   const ip =
+//     req.headers["x-forwarded-for"]?.split(",")[0] ||
+//     req.socket.remoteAddress;
 
-//     const geo = geoip.lookup(ip);
-//     const city = geo?.city || "Unknown";
+//   const geo = geoip.lookup(ip);
+//   req.body.city = geo?.city || "Unknown";
 
-//     const comment = await Comment.create({
-//       videoid: req.body.videoid,
-//       userid: req.body.userid,
-//       commentbody: req.body.commentbody,
-//       usercommented: req.body.usercommented || "Unknown User",
-//       city: city,
-//     });
-
-//     res.json({ comment });
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({ error: "Error posting comment" });
-//   }
+//   postcomment(req, res);
 // });
 
-// // DELETE COMMENT
-// router.delete("/deletecomment/:id", deletecomment);
-
-// // EDIT COMMENT
-// router.put("/edit/:id", async (req, res) => {
-//   try {
-//     const updated = await Comment.findByIdAndUpdate(
-//       req.params.id,
-//       { commentbody: req.body.commentbody },
-//       { new: true },
-//     );
-
-//     res.json(updated);
-//   } catch (err) {
-//     res.status(500).json({ error: "Failed to update" });
-//   }
-// });
-
-// // TRANSLATE COMMENT
-// router.post("/translate", translateComment);
-
+// router.put("/edit/:id", editcomment);
 // router.put("/dislike/:id", dislikeComment);
-
-// // GET ALL COMMENTS
+// router.post("/translate", translateComment);
 // router.get("/:videoid", getallcomment);
 
 // export default router;

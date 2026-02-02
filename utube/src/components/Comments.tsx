@@ -187,7 +187,18 @@ const Comments = ({ videoId }: { videoId: string }) => {
                 <span className="text-xs text-gray-400">
                   {formatDistanceToNow(new Date(c.commentedon))} ago
                 </span>
-                {c.city && <span className="text-xs">{c.city}</span>}
+                {/* {c.city && <span className="text-xs">{c.city}</span>} */}
+                {c.city && c.city !== "Localhost" && c.city !== "Unknown" && (
+                  <span className="text-xs text-gray-500">
+                    {c.city} (approx.)
+                  </span>
+                )}
+
+                {c.city === "Localhost" && (
+                  <span className="text-xs text-gray-500 italic">
+                    Local environment
+                  </span>
+                )}
               </div>
 
               {/* BODY / EDIT */}

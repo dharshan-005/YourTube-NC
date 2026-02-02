@@ -1,6 +1,10 @@
 "use client";
 
+import { API_URL } from "@/lib/constants";
 import React, { useRef, useEffect, useState } from "react";
+
+console.log("Video player loaded")
+console.log("API_URL =", API_URL);
 
 interface Video {
   _id: string;
@@ -18,7 +22,7 @@ export default function VideoPlayer({ videos }: VideoPlayerProps) {
   const [tapTimeout, setTapTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const handleTap = (
-    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
+    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
   ) => {
     const rect = e.currentTarget.getBoundingClientRect();
     let x: number;
@@ -61,12 +65,12 @@ export default function VideoPlayer({ videos }: VideoPlayerProps) {
             if (zone === "left") {
               videoRef.current.currentTime = Math.max(
                 0,
-                videoRef.current.currentTime - 10
+                videoRef.current.currentTime - 10,
               );
             } else if (zone === "right") {
               videoRef.current.currentTime = Math.min(
                 videoRef.current.duration,
-                videoRef.current.currentTime + 10
+                videoRef.current.currentTime + 10,
               );
             }
           }
@@ -81,7 +85,7 @@ export default function VideoPlayer({ videos }: VideoPlayerProps) {
         }
 
         setTapCount(0);
-      }, 300)
+      }, 300),
     );
   };
 
@@ -97,18 +101,18 @@ export default function VideoPlayer({ videos }: VideoPlayerProps) {
   return (
     <div className="aspect-video bg-black rounded-lg overflow-hidden">
       {videos && videos.length > 0 ? (
-      <video
-        ref={videoRef}
-        className="w-full h-full"
-        controls
-        poster={`/placeholder.svg?height=480&width=854`}
-      >
-        <source
-          src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${videos[currentIndex]?.filepath}`}
-          type="video/mp4"
-        />
-        Your browser does not support the video tag.
-      </video>
+        <video
+          ref={videoRef}
+          className="w-full h-full"
+          controls
+          poster={`/placeholder.svg?height=480&width=854`}
+        >
+          <source
+            src={`${API_URL}/${videos[currentIndex]?.filepath}`}
+            type="video/mp4"
+          />
+          Your browser does not support the video tag.
+        </video>
       ) : (
         <div className="w-full h-full flex items-center justify-center text-white">
           No videos available.

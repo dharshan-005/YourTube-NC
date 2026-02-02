@@ -12,6 +12,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { useUser } from "@/lib/AuthContext";
 import axiosInstance from "@/lib/axiosinstance";
+import { API_URL } from "@/lib/constants";
 
 const VideoInfo = ({ video }: any) => {
   const [likes, setlikes] = useState(video.Like || 0);
@@ -122,7 +123,7 @@ const VideoInfo = ({ video }: any) => {
     try {
       const token = localStorage.getItem("token");
 
-      const downloadUrl = `${process.env.BACKEND_URL}/video/download/${video._id}`;
+      const downloadUrl = `${API_URL}/video/download/${video._id}`;
 
       const link = document.createElement("a");
       link.href = downloadUrl;

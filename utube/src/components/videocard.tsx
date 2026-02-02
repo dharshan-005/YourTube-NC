@@ -4,6 +4,7 @@ import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { API_URL } from "@/lib/constants";
 
 export default function VideoCard({ video }: any) {
   const [duration, setDuration] = useState<number | null>(null);
@@ -19,7 +20,7 @@ export default function VideoCard({ video }: any) {
       <div className="space-y-3">
         <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
           <video
-            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${video?.filepath}`}
+            src={`${API_URL}/${video?.filepath}`}
             className="object-cover group-hover:scale-105 transition-transform duration-200"
             onLoadedMetadata={(e) =>
               setDuration(e.currentTarget.duration)

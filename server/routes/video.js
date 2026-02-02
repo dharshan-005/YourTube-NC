@@ -19,3 +19,4 @@ routes.get("/getall", getallvideo);
 routes.get("/user/:id", getVideosByUser);
 
 export default routes;
+  

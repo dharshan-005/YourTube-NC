@@ -68,7 +68,15 @@ const Comments = ({ videoId }: { videoId: string }) => {
   };
 
   const handleLike = async (id: string) => {
-    // optional – not implemented backend-side
+    try {
+      const res = await axiosInstance.put(`/comment/like/${id}`);
+
+      setComments((prev) =>
+        prev.map((c) => (c._id === id ? { ...c, likes: res.data.likes } : c)),
+      );
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handleDislike = async (id: string) => {

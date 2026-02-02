@@ -5,6 +5,7 @@ import {
   getallcomment,
   editcomment,
   translateComment,
+  likeComment,
   dislikeComment,
 } from "../controllers/comment.js";
 
@@ -31,11 +32,7 @@ router.post("/postcomment", async (req, res) => {
   let city = "Unknown";
 
   // Localhost handling (DEV only)
-  if (
-    ip === "127.0.0.1" ||
-    ip === "::1" ||
-    ip?.includes("127.0.0.1")
-  ) {
+  if (ip === "127.0.0.1" || ip === "::1" || ip?.includes("127.0.0.1")) {
     city = "Localhost";
   } else {
     const geo = geoip.lookup(ip);
@@ -48,6 +45,7 @@ router.post("/postcomment", async (req, res) => {
 });
 
 router.put("/edit/:id", editcomment);
+router.put("/like/:id", likeComment);
 router.put("/dislike/:id", dislikeComment);
 router.post("/translate", translateComment);
 router.get("/:videoid", getallcomment);

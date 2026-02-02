@@ -19,6 +19,11 @@ const commentschema = mongoose.Schema(
       type: String,
       default: "Unknown",
     },
+    
+    likes: {
+      type: Number,
+      default: 0,
+    },
     dislikes: {
       type: Number,
       default: 0,

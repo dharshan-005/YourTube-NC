@@ -32,6 +32,26 @@ export const editcomment = async (req, res) => {
   res.json(updated);
 };
 
+export const likeComment = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const comment = await Comment.findById(id);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    comment.likes += 1;
+    await comment.save();
+
+    return res.status(200).json({ likes: comment.likes });
+  } catch (error) {
+    console.error("Like error:", error);
+    return res.status(500).json({ message: "Something went wrong while liking" });
+  }
+};
+
+
 export const dislikeComment = async (req, res) => {
   const c = await Comment.findById(req.params.id);
   if (!c) return res.status(404).json({ message: "Not found" });

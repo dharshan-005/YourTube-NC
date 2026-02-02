@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import userroutes from "./routes/auth.js";
-import channelRoutes from "./routes/channel.js"
+import channelRoutes from "./routes/channel.js";
 import videoroutes from "./routes/video.js";
 import likeroutes from "./routes/like.js";
 import watchlaterroutes from "./routes/watchlater.js";
@@ -16,22 +16,42 @@ const app = express();
 
 import path from "path";
 
+app.set("trust proxy", true);
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://your-tube-nc.vercel.app",
+];
+
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://your-tube-nc.vercel.app"], // frontend URL
-    credentials: true,              // allow cookies / auth headers
-    methods: ["GET", "POST","PUT", "PATCH", "DELETE"],
+    origin: function (origin, callback) {
+      // allow server-to-server / Postman / curl
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 app.use(express.json({ limit: "30mb", extended: true }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
+
 app.use("/uploads", express.static(path.join("uploads")));
+
 app.get("/", (req, res) => {
   res.send("You tube backend is working");
 });
+
 app.use(bodyParser.json());
+
 app.use("/user", userroutes);
 app.use("/channel", channelRoutes);
 app.use("/video", videoroutes);
@@ -45,7 +65,6 @@ app.listen(PORT, () => {
   console.log(`server running on port ${PORT}`);
 });
 
-app.set("trust proxy", true); 
 
 const DBURL = process.env.MONGO_URI;
 mongoose

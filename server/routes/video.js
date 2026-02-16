@@ -3,7 +3,8 @@ import {
   getallvideo,
   uploadvideo,
   downloadVideo,
-  getVideosByUser, // 👈 ADD THIS
+  getVideosByUser,
+  getVideoById,
 } from "../controllers/video.js";
 
 import upload from "../filehelper/filehelper.js";
@@ -15,8 +16,7 @@ routes.post("/upload", authMiddleware, upload.single("file"), uploadvideo);
 routes.get("/download/:videoId", authMiddleware, downloadVideo);
 routes.get("/getall", getallvideo);
 
-// ✅ ADD THIS ROUTE
 routes.get("/user/:id", getVideosByUser);
+routes.get("/watch/:id", authMiddleware, getVideoById);
 
 export default routes;
-  

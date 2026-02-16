@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
+import Auth from "../models/Auth.js";
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -10,7 +11,11 @@ const authMiddleware = (req, res, next) => {
 
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await Auth.findById(decoded.id);
+
     req.user = { id: decoded.id };
+    req.userDoc = user;
 
     next();
   } catch (error) {

@@ -1,12 +1,18 @@
-import express from "express"
-import { login, updateprofile, getUserById } from "../controllers/auth.js"
+import express from "express";
+import { login, updateprofile, getUserById, getCurrentUser, cancelPremium } from "../controllers/auth.js";
+import authMiddleware from "../middleware/auth.js";
+import { getUserDownloads } from "../controllers/auth.js";
 
-const routes = express.Router()
+const routes = express.Router();
 
-routes.post('/login', login)
-routes.patch("/update/:id",updateprofile)
+routes.post("/login", login);
+routes.patch("/update/:id", updateprofile);
+
+routes.get("/me", authMiddleware, getCurrentUser)
+routes.get("/downloads", authMiddleware, getUserDownloads);
+routes.post("/cancel-premium", authMiddleware, cancelPremium);
 routes.get("/:id", getUserById);
 
 // routes.post('/verify-otp', verifyOtp);
 
-export default routes
+export default routes;

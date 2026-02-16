@@ -8,7 +8,7 @@ const downloadSchema = new mongoose.Schema({
   },
   videoId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Video",
+    ref: "videofiles",
     required: true,
   },
   downloadedAt: {

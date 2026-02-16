@@ -1,9 +1,10 @@
 "use client";
 
 import { API_URL } from "@/lib/constants";
+import { useRouter } from "next/router";
 import React, { useRef, useEffect, useState } from "react";
 
-console.log("Video player loaded")
+console.log("Video player loaded");
 console.log("API_URL =", API_URL);
 
 interface Video {
@@ -13,13 +14,22 @@ interface Video {
 }
 interface VideoPlayerProps {
   videos: Video[];
+  allowedMinutes?: number | null;
 }
 
-export default function VideoPlayer({ videos }: VideoPlayerProps) {
+export default function VideoPlayer({
+  videos,
+  allowedMinutes,
+}: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [tapCount, setTapCount] = useState(0);
   const [tapTimeout, setTapTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const router = useRouter();
+
+  const limitReachedRef = useRef(false);
 
   const handleTap = (
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
@@ -98,8 +108,37 @@ export default function VideoPlayer({ videos }: VideoPlayerProps) {
     }
   }, [currentIndex, videos]);
 
+  useEffect(() => {
+    if (!videoRef.current) return;
+    if (!allowedMinutes || allowedMinutes === Infinity) return;
+
+    const maxSeconds = allowedMinutes * 60;
+    // const maxSeconds = 10; // For testing, limit to 10 seconds;
+
+    const handleTimeUpdate = () => {
+      if (!videoRef.current) return;
+      if (limitReachedRef.current) return;
+
+      if (videoRef.current.currentTime >= maxSeconds && !showUpgradeModal) {
+        limitReachedRef.current = true;
+
+        videoRef.current.currentTime = maxSeconds;
+        videoRef.current.pause();
+
+        // alert("Watch limit reached. Please upgrade your plan.");
+        setShowUpgradeModal(true);
+      }
+    };
+
+    videoRef.current.addEventListener("timeupdate", handleTimeUpdate);
+
+    return () => {
+      videoRef.current?.removeEventListener("timeupdate", handleTimeUpdate);
+    };
+  }, [allowedMinutes]);
+
   return (
-    <div className="aspect-video bg-black rounded-lg overflow-hidden">
+    <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
       {videos && videos.length > 0 ? (
         <video
           ref={videoRef}
@@ -116,6 +155,24 @@ export default function VideoPlayer({ videos }: VideoPlayerProps) {
       ) : (
         <div className="w-full h-full flex items-center justify-center text-white">
           No videos available.
+        </div>
+      )}
+
+      {showUpgradeModal && (
+        <div className="absolute inset-0 backdrop-blur-md bg-black/60 flex items-center justify-center">
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl text-center space-y-4 shadow-xl">
+            <h2 className="text-xl font-semibold">Watch Limit Reached</h2>
+            <p className="text-gray-500">
+              Upgrade your plan to continue watching this video.
+            </p>
+
+            <button
+              onClick={() => router.push("/upgrade")}
+              className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-6 py-2 rounded-lg transition cursor-pointer"
+            >
+              Upgrade Now
+            </button>
+          </div>
         </div>
       )}
     </div>

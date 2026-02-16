@@ -211,6 +211,9 @@ const Header = ({ onMenuClick }: HeaderProps) => {
                     <Link href="/history">History</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
+                    <Link href="/downloads">Downloads</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link href="/liked">Liked videos</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

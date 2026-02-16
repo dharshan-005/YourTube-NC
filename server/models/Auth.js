@@ -1,12 +1,4 @@
 import mongoose from "mongoose";
-// const userschema = mongoose.Schema({
-//   email: { type: String, required: true },
-//   name: { type: String },
-//   channelname: { type: String },
-//   description: { type: String },
-//   image: { type: String },
-//   joinedon: { type: Date, default: Date.now },
-// });
 
 const userSchema = new mongoose.Schema({
   name: String,
@@ -38,6 +30,17 @@ const userSchema = new mongoose.Schema({
       downloadedAt: Date,
     },
   ],
+  
+  subscription: {
+    plan: {
+      type: String,
+      enum: ["FREE", "BRONZE", "SILVER", "GOLD"],
+      default: "FREE",
+    },
+    validTill: {
+      type: Date,
+    },
+  },
 });
 
 export default mongoose.model("user", userSchema);

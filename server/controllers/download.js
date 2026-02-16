@@ -25,7 +25,7 @@ export const downloadVideo = async (req, res) => {
   await user.save();
 
   await Download.create({
-    userId,
+    userId: user._id,
     videoId,
   });
 

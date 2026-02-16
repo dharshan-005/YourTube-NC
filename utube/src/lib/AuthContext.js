@@ -77,7 +77,7 @@ export const UserProvider = ({ children }) => {
 
       // ✅ 1. FIRST try localStorage
       const storedUser = localStorage.getItem("user");
-      if (storedUser) {
+      if (storedUser && !user) {
         setUser(JSON.parse(storedUser));
         return;
       }
@@ -105,6 +105,22 @@ export const UserProvider = ({ children }) => {
     return () => unsubcribe();
   }, []);
 
+  const refreshUser = async () => {
+    try {
+      const res = await axiosInstance.get("/user/me");
+
+      const updatedUser = {
+        ...res.data,
+        token: user?.token,
+      };
+
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+    } catch (error) {
+      console.error("Failed to refresh user", error);
+    }
+  };
+
   // useEffect(() => {
   //   const unsubcribe = onAuthStateChanged(auth, async (firebaseuser) => {
   //     if (firebaseuser) {
@@ -129,7 +145,9 @@ export const UserProvider = ({ children }) => {
   // }, []);
 
   return (
-    <UserContext.Provider value={{ user, login, logout, handlegooglesignin }}>
+    <UserContext.Provider
+      value={{ user, refreshUser, login, logout, handlegooglesignin }}
+    >
       {children}
     </UserContext.Provider>
   );

@@ -110,3 +110,36 @@ export const getVideosByUser = async (req, res) => {
   }
 };
 
+export const getVideoById = async (req, res) => {
+  try {
+    const videoId = req.params.id;
+
+    const file = await video.findById(videoId);
+    const user = await Auth.findById(req.user.id);
+
+    if (!file) {
+      return res.status(404).json({ message: "Video not found" });
+    }
+
+    // ---- Plan Limits ----
+    const limits = {
+      FREE: 5,
+      BRONZE: 7,
+      SILVER: 10,
+      GOLD: Infinity,
+    };
+
+    const userPlan = user?.subscription?.plan || "FREE";
+    const allowedMinutes = limits[userPlan];
+
+    return res.status(200).json({
+      video: file,
+      allowedMinutes,
+    });
+
+  } catch (error) {
+    console.error("Watch video error:", error);
+    res.status(500).json({ message: "Failed to fetch video" });
+  }
+};
+

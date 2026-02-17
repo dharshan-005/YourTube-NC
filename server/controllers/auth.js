@@ -61,11 +61,13 @@ export const login = async (req, res) => {
       "Telangana",
     ];
 
-    // const hour = new Date().getHours();
-    const indianTime = new Date().toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
-    });
-    const hour = new Date(indianTime).getHours();
+    const hour = Number(
+      new Date().toLocaleString("en-US", {
+        timeZone: "Asia/Kolkata",
+        hour: "numeric",
+        hour12: false,
+      }),
+    );
 
     const isSouth = southernStates.includes(locationState);
     const isTimeValid = hour >= 10 && hour < 12;
@@ -192,11 +194,13 @@ export const googleLogin = async (req, res) => {
       "Telangana",
     ];
 
-    const hour = Number(new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
-      hour: "numeric",
-      hour12: false,
-    }));
+    const hour = Number(
+      new Date().toLocaleString("en-US", {
+        timeZone: "Asia/Kolkata",
+        hour: "numeric",
+        hour12: false,
+      }),
+    );
 
     const isSouth = southernStates.includes(locationState);
     const isTimeValid = hour >= 10 && hour < 12;

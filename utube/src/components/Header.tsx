@@ -34,9 +34,10 @@ const Header = ({ onMenuClick }: HeaderProps) => {
     }
   }, [isSearchOpen]);
 
-  const { user, logout, handlegooglesignin } = useUser();
+  const { user, logout, handlegooglesignin, loading } = useUser();
   // const [user, setUser] = useState(null);
   console.log("Current user in header:", user);
+  if (loading) return <div>Loading...</div>;
 
   // const user: any = {
   //   id: "1",

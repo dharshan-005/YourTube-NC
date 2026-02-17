@@ -37,7 +37,6 @@ const Header = ({ onMenuClick }: HeaderProps) => {
   const { user, logout, handlegooglesignin, loading } = useUser();
   // const [user, setUser] = useState(null);
   console.log("Current user in header:", user);
-  if (loading) return <div>Loading...</div>;
 
   // const user: any = {
   //   id: "1",
@@ -61,6 +60,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
   };
   return (
     <>
+      if (loading) return <div>Loading...</div>;
       <header className="flex flex-row items-center gap-4 justify-between px-4 py-2 bg-white dark:bg-black dark:text-white border-b">
         <div className="flex items-center gap-4 justify-between">
           <Button

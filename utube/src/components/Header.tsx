@@ -38,16 +38,6 @@ const Header = ({ onMenuClick }: HeaderProps) => {
   // const [user, setUser] = useState(null);
   console.log("Current user in header:", user);
 
-  useEffect(() => {
-    if (user?.theme === "light") {
-      document.body.classList.add("light-theme");
-      document.body.classList.remove("dark-theme", "dark");
-    } else {
-      document.body.classList.add("dark-theme");
-      document.body.classList.add("dark");
-      document.body.classList.remove("light-theme");
-    }
-  }, [user?.theme]);
   // const user: any = {
   //   id: "1",
   //   name: "John Doe",
@@ -228,7 +218,8 @@ const Header = ({ onMenuClick }: HeaderProps) => {
             <>
               <Button
                 className="flex items-center gap-2"
-                onClick={handlegooglesignin}
+                // onClick={handlegooglesignin}
+                onClick={() => router.push("/login")}
               >
                 <User className="w-4 h-4" />
                 Sign in

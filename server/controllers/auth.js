@@ -41,6 +41,9 @@ export const login = async (req, res) => {
     };
 
     const geo = geoip.lookup(ip);
+    console.log("IP:", ip);
+    console.log("Full Geo Object:", geo);
+
     const stateCode = geo?.region;
     // const stateCode = "TN"
 
